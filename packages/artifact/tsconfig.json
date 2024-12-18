@@ -10,6 +10,9 @@
       ],
       "@actions/http-client": [
         "../http-client"
+      ],
+      "@actions/artifact": [
+        "node_modules/@actions/artifact"
       ]
     },
     "useUnknownInCatchVariables": false,

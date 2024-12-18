@@ -20,6 +20,11 @@ import {
   StringValue
 } from '../../generated'
 import {FilesNotFoundError, InvalidResponseError} from '../shared/errors'
+import {
+  getUploadChunkSize,
+  getConcurrency,
+  getUploadChunkTimeout
+} from '../shared/config'
 
 export async function uploadArtifact(
   name: string,
@@ -73,10 +78,28 @@ export async function uploadArtifact(
     options?.compressionLevel
   )
 
+  let concurrency = options?.concurrency
+  if (!concurrency) {
+    concurrency= getConcurrency()
+  }
+
+  let chunkSize = options?.chunkSize
+  if (!chunkSize) {
+    chunkSize = getUploadChunkSize()
+  }
+
+  let timeout = options?.timeout
+  if (!timeout) {
+    timeout = getUploadChunkTimeout()
+  }
+
   // Upload zip to blob storage
   const uploadResult = await uploadZipToBlobStorage(
     createArtifactResp.signedUploadUrl,
-    zipUploadStream
+    zipUploadStream,
+    concurrency,
+    chunkSize,
+    timeout
   )
 
   // finalize the artifact

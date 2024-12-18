@@ -1,11 +1,6 @@
 import {BlobClient, BlockBlobUploadStreamOptions} from '@azure/storage-blob'
 import {TransferProgressEvent} from '@azure/core-http'
 import {ZipUploadStream} from './zip'
-import {
-  getUploadChunkSize,
-  getConcurrency,
-  getUploadChunkTimeout
-} from '../shared/config'
 import * as core from '@actions/core'
 import * as crypto from 'crypto'
 import * as stream from 'stream'
@@ -25,7 +20,10 @@ export interface BlobUploadResponse {
 
 export async function uploadZipToBlobStorage(
   authenticatedUploadURL: string,
-  zipUploadStream: ZipUploadStream
+  zipUploadStream: ZipUploadStream,
+  maxConcurrency: number,
+  bufferSize: number,
+  timeout: number,
 ): Promise<BlobUploadResponse> {
   let uploadByteCount = 0
   let lastProgressTime = Date.now()
@@ -45,8 +43,7 @@ export async function uploadZipToBlobStorage(
       })
     })
 
-  const maxConcurrency = getConcurrency()
-  const bufferSize = getUploadChunkSize()
+  
   const blobClient = new BlobClient(authenticatedUploadURL)
   const blockBlobClient = blobClient.getBlockBlobClient()
 
@@ -83,7 +80,7 @@ export async function uploadZipToBlobStorage(
         maxConcurrency,
         options
       ),
-      chunkTimer(getUploadChunkTimeout())
+      chunkTimer(timeout)
     ])
   } catch (error) {
     if (NetworkError.isNetworkErrorCode(error?.code)) {

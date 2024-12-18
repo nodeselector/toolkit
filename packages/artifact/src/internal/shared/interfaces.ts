@@ -50,6 +50,10 @@ export interface UploadArtifactOptions {
    * For large files that are not easily compressed, a value of 0 is recommended for significantly faster uploads.
    */
   compressionLevel?: number
+
+  concurrency?: number
+  chunkSize?: number
+  timeout?: number
 }
 
 /**
